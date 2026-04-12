@@ -162,6 +162,14 @@ uint32_t stix_check_sv(struct stix_breakpoint *q_left_bp,
                               evidence_type,
                               slop);
         break;
+    case FUSION:
+        return stix_check_fusion(q_left_bp,
+                                 q_right_bp,
+                                 in_left_bp,
+                                 in_right_bp,
+                                 evidence_type,
+                                 slop);
+        break;
     default:
         errx(1, "Unknown SV type");
     }
@@ -829,6 +837,36 @@ uint32_t stix_check_dup(struct stix_breakpoint *q_left_bp,
 }
 //}}}
 
+//{{{uint32_t stix_check_fusion(struct stix_breakpoint *q_left_bp,
+uint32_t stix_check_fusion(struct stix_breakpoint *q_left_bp,
+                           struct stix_breakpoint *q_right_bp,
+                           struct stix_breakpoint *in_left_bp,
+                           struct stix_breakpoint *in_right_bp,
+                           uint32_t evidence_type,
+                           uint32_t slop)
+{
+    /*
+     * FUSION: Gene fusion search
+     * - Search only on left query region (giggle searches left region only)
+     * - Filter results where right intervals intersect with right query region
+     * - No strand validation required
+     * - Works for both intra-chromosomal and inter-chromosomal fusions
+     */
+
+    // Check if left intervals intersect with left query region
+    if ((in_left_bp->end >= q_left_bp->start) &&      // end after start
+        (in_left_bp->start < q_left_bp->end + slop))  // start before end
+    {
+        // Now check if right intervals intersect with right query region
+        if ((in_right_bp->end >= q_right_bp->start) &&     // r end after start
+            (in_right_bp->start < q_right_bp->end + slop)) // r start before end
+            return 1;
+    }
+
+    return 0;
+}
+//}}}
+
 //{{{void stix_run_giggle_query(struct giggle_index **gi,
 uint32_t stix_run_giggle_query(struct giggle_index **gi,
                                char *giggle_index_dir,
@@ -953,6 +991,14 @@ uint32_t stix_run_giggle_query(struct giggle_index **gi,
 
         q_start -= (slop / 2);
         q_end += (slop / 2);
+    }
+    else if (sv_type == FUSION)
+    {
+        /*
+        FUSION searches only on the left query region.
+        No expansion of search region needed - giggle will search
+        exactly within q_start to q_end on the left breakpoint.
+        */
     }
 
     struct giggle_query_result *gqr = giggle_query(*gi,

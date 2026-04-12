@@ -10,11 +10,11 @@
 
 uint32_t safe_sub(uint32_t a, uint32_t b);
 
-char *stix_sv_type_strings[5];
+char *stix_sv_type_strings[6];
 
 enum stix_sv_type
 {
-    DEL, DUP, INS, INV, BND
+    DEL, DUP, INS, INV, BND, FUSION
 };
 
 struct stix_breakpoint
@@ -89,6 +89,13 @@ uint32_t stix_check_dup(struct stix_breakpoint *q_left_bp,
                         uint32_t evidence_type,
                         uint32_t slop);
 
+
+uint32_t stix_check_fusion(struct stix_breakpoint *q_left_bp,
+                           struct stix_breakpoint *q_right_bp,
+                           struct stix_breakpoint *in_left_bp,
+                           struct stix_breakpoint *in_right_bp,
+                           uint32_t evidence_type,
+                           uint32_t slop);
 struct stix_breakpoint *stix_region_to_breakpoint(char *region);
 
 uint32_t stix_get_uniq(uint32_t *full,

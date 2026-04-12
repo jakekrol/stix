@@ -14,7 +14,7 @@
 #include "search.h"
 #include "sharding_utils.h"
 
-char *stix_sv_type_strings[5] = {"DEL", "DUP", "INS", "INV", "BND"};
+char *stix_sv_type_strings[6] = {"DEL", "DUP", "INS", "INV", "BND", "FUSION"};
 
 uint32_t parse_aggregate_csv(char *aggregate,
                              char ***agg_cols);
@@ -60,7 +60,7 @@ int help(int exit_code)
             "             -a  List of columns to aggregate over\n"
             "             -F  Filter samples by PED field query\n"
             "             -j  JSON output\n"
-            "             -t  SV type (DEL,INS,INV,DUP,BND) \n"
+            "             -t  SV type (DEL,INS,INV,DUP,BND,FUSION) \n"
             "             -L  Length of Insertion(use it when -t INS) \n"
             "             -R  Relative Erorr Threshold to compare the length of query INS and targeted INS (0.0-1.0) (default:0.15) \n"
             "             -v  Add sample depth to VCF file\n"
@@ -946,6 +946,8 @@ int main(int argc, char **argv)
                     query_type = BND;
                 else if (strcmp(sv_type, "INS") == 0)
                     query_type = INS;
+                else if (strcmp(sv_type, "FUSION") == 0)
+                    query_type = FUSION;
 
                 uint32_t num_sample_alt_depths =
                     stix_run_giggle_query(&gi,
@@ -1227,6 +1229,8 @@ int main(int argc, char **argv)
                 query_type = BND;
             else if (strcmp(sv_type, "INS") == 0)
                 query_type = INS;
+            else if (strcmp(sv_type, "FUSION") == 0)
+                query_type = FUSION;
 
             /*from xinchang
             setup array for all independent query.
@@ -1339,6 +1343,8 @@ int main(int argc, char **argv)
                     query_type = BND;
                 else if (strcmp(table_query_arr[table_q_idx].svtype, "INS") == 0)
                     query_type = INS;
+                else if (strcmp(table_query_arr[table_q_idx].svtype, "FUSION") == 0)
+                    query_type = FUSION;
 
                 /*from xinchang
                 setup array for all independent query.
